@@ -4,19 +4,18 @@ import (
 	"net/http"
 )
 
-type HandlerFunc func(http.ResponseWriter, *http.Request)
+type HandlerFunc func(c *Context)
 
 type Engine struct {
-	router map[string]HandlerFunc
+	router *router
 }
 
 func New() *Engine {
-	return &Engine{router: make(map[string]HandlerFunc)}
+	return &Engine{router: createRouter()}
 }
 
 func (engine *Engine) addRouter(method string, path string, handler HandlerFunc) {
-	key := method + "-" + path
-	engine.router[key] = handler
+	engine.router.addRouter(method, path, handler)
 }
 
 func (engine *Engine) GET(path string, handler HandlerFunc) {
@@ -28,14 +27,8 @@ func (engine *Engine) POST(path string, handler HandlerFunc) {
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	method := r.Method
-	path := r.URL.Path
-	key := method + "-" + path
-	if handler, ok := engine.router[key]; ok {
-		handler(w, r)
-	} else {
-		w.Write([]byte("404"))
-	}
+	context := createContext(w, r)
+	engine.router.handler(context)
 }
 
 func (engine *Engine) Run(addr string) error {

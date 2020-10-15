@@ -2,11 +2,18 @@ package main
 
 import (
 	"Boo"
-	"net/http"
+	"fmt"
 )
 
-func Hello(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello"))
+func Hello(c *Boo.Context) {
+	name := c.Query("name")
+	fmt.Println(name)
+	user := map[string]string{
+		"name": name,
+		"age":  "27",
+		"爱好":   "哭鼻子",
+	}
+	c.Json(200, user)
 }
 
 func main() {
