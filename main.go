@@ -18,6 +18,11 @@ func Hello(c *Boo.Context) {
 
 func main() {
 	boo := Boo.New()
+	boo.GET("/", Hello)
 	boo.GET("/hello", Hello)
+	boo.GET("/hello/:name", Hello)
+	boo.GET("/hello/:suck", Hello)
+	boo.GET("/hello2", Hello)
+	boo.GET("/hello3/:name", Hello)
 	boo.Run(":8080")
 }
