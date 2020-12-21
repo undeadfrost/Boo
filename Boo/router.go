@@ -48,11 +48,29 @@ func (r *router) addRouter(method string, path string, handler HandlerFunc) {
 	r.handlers[key] = handler
 }
 
+func (r *router) getRouter(method string, path string) (*node, map[string]string) {
+	paths := parsePattern(path)
+
+	if _, ok := r.trees[method]; !ok {
+		return nil, nil
+	}
+
+	n, params := r.trees[method].search(path, paths)
+	return n, params
+}
+
 func (r *router) handler(c *Context) {
-	key := c.Method + "-" + c.Path
-	if handler, ok := r.handlers[key]; ok {
-		handler(c)
+	//key := c.Method + "-" + c.Path
+	n, params := r.getRouter(c.Method, c.Path)
+	if n != nil {
+		c.Params = params
+		n.handler(c)
 	} else {
 		c.String(http.StatusNotFound, "404 Not Fount: %s\n", c.Path)
 	}
+	//if handler, ok := r.handlers[key]; ok {
+	//	handler(c)
+	//} else {
+	//	c.String(http.StatusNotFound, "404 Not Fount: %s\n", c.Path)
+	//}
 }

@@ -42,6 +42,20 @@ func (n *node) insert(pattern string, parts []string, handler HandlerFunc) {
 }
 
 // 查找节点
-func (n *node) getNode() {
+func (n *node) search(pattern string, parts []string) (*node, map[string]string) {
+	params := make(map[string]string)
 
+	for i := 0; i < len(parts); i++ {
+		child := n.matchChild(parts[i])
+
+		if child == nil {
+			return nil, nil
+		} else if child.wildChild {
+			params[child.path[1:]] = parts[i]
+		}
+
+		n = child
+	}
+
+	return n, params
 }
