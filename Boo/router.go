@@ -7,14 +7,12 @@ import (
 )
 
 type router struct {
-	trees    map[string]*node
-	handlers map[string]HandlerFunc
+	trees map[string]*node
 }
 
 func createRouter() *router {
 	return &router{
-		trees:    make(map[string]*node),
-		handlers: make(map[string]HandlerFunc),
+		trees: make(map[string]*node),
 	}
 }
 
@@ -41,26 +39,19 @@ func (r *router) addRouter(method string, path string, handler HandlerFunc) {
 		r.trees[method] = new(node)
 	}
 
-	paths := parsePattern(path)
-
-	r.trees[method].insert(path, paths, handler)
-	key := method + "-" + path
-	r.handlers[key] = handler
+	r.trees[method].insert(path, handler)
 }
 
-func (r *router) getRouter(method string, path string) (*node, map[string]string) {
-	paths := parsePattern(path)
-
+func (r *router) getRouter(method string, path string) (*node, []Param) {
 	if _, ok := r.trees[method]; !ok {
 		return nil, nil
 	}
 
-	n, params := r.trees[method].search(path, paths)
+	n, params := r.trees[method].search(path)
 	return n, params
 }
 
 func (r *router) handler(c *Context) {
-	//key := c.Method + "-" + c.Path
 	n, params := r.getRouter(c.Method, c.Path)
 	if n != nil {
 		c.Params = params
@@ -68,9 +59,4 @@ func (r *router) handler(c *Context) {
 	} else {
 		c.String(http.StatusNotFound, "404 Not Fount: %s\n", c.Path)
 	}
-	//if handler, ok := r.handlers[key]; ok {
-	//	handler(c)
-	//} else {
-	//	c.String(http.StatusNotFound, "404 Not Fount: %s\n", c.Path)
-	//}
 }

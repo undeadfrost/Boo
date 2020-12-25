@@ -8,12 +8,17 @@ import (
 
 type H map[string]interface{}
 
+type Param struct {
+	key   string
+	value string
+}
+
 type Context struct {
 	Writer     http.ResponseWriter
 	Req        *http.Request
 	Method     string
 	Path       string
-	Params     map[string]string
+	Params     []Param
 	StatusCode int
 }
 
@@ -27,8 +32,12 @@ func createContext(w http.ResponseWriter, r *http.Request) *Context {
 }
 
 func (c *Context) Param(key string) string {
-	value, _ := c.Params[key]
-	return value
+	for i := range c.Params {
+		if c.Params[i].key == key {
+			return c.Params[i].value
+		}
+	}
+	return ""
 }
 
 func (c *Context) Query(key string) string {
